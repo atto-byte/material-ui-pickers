@@ -11,7 +11,7 @@ import { makeMaskFromFormat, maskedDateFormatter } from '../_helpers/text-field-
 export interface KeyboardDateInputProps
   extends ExtendMui<BaseTextFieldProps, 'variant' | 'onError' | 'onChange' | 'value'> {
   format: string;
-  onChange: (value: string) => void;
+  onChange: (value: string | null) => void;
   onClick?: () => void;
   validationError?: React.ReactNode;
   inputValue: string;
@@ -46,6 +46,8 @@ export interface KeyboardDateInputProps
    * @type {Partial<IconButtonProps>}
    */
   KeyboardButtonProps?: Partial<IconButtonProps>;
+  /** Custom formatter to be passed into Rifm component */
+  rifmFormatter?: (str: string) => string;
 }
 
 const KeyboardDateInput: React.FunctionComponent<KeyboardDateInputProps> = ({
@@ -63,6 +65,7 @@ const KeyboardDateInput: React.FunctionComponent<KeyboardDateInputProps> = ({
   format,
   keyboardIcon,
   disabled,
+  rifmFormatter,
   TextFieldComponent = TextField,
   ...other
 }) => {
@@ -76,8 +79,18 @@ const KeyboardDateInput: React.FunctionComponent<KeyboardDateInputProps> = ({
   const position =
     InputAdornmentProps && InputAdornmentProps.position ? InputAdornmentProps.position : 'end';
 
+  const handleChange = (text: string) => {
+    const finalString = text === '' || text === inputMask ? null : text;
+    onChange(finalString);
+  };
+
   return (
-    <Rifm value={inputValue} onChange={onChange} refuse={refuse} format={formatter}>
+    <Rifm
+      value={inputValue}
+      onChange={handleChange}
+      refuse={refuse}
+      format={rifmFormatter || formatter}
+    >
       {({ onChange, value }) => (
         <TextFieldComponent
           disabled={disabled}

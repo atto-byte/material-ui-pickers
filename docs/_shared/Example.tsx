@@ -1,17 +1,17 @@
+import * as React from 'react';
 import Code from './Code';
 import CodeIcon from '@material-ui/icons/Code';
 import CopyIcon from '@material-ui/icons/FileCopy';
 import GithubIcon from '_shared/svgIcons/GithubIcon';
-import React, { useState, useCallback, useMemo, useContext } from 'react';
 import { copy } from 'utils/helpers';
 import { GITHUB_EDIT_URL } from '_constants';
-import { useUtils } from '@material-ui/pickers';
 import { replaceGetFormatStrings } from 'utils/utilsService';
 import { withSnackbar, InjectedNotistackProps } from 'notistack';
 import { withUtilsService, UtilsContext } from './UtilsServiceContext';
 import { makeStyles, IconButton, Collapse, Tooltip } from '@material-ui/core';
 
 interface Props extends InjectedNotistackProps {
+  testId: string;
   source: { raw: string; relativePath: string; default: React.FC<any> };
 }
 
@@ -60,20 +60,19 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function Example({ source, enqueueSnackbar }: Props) {
+function Example({ source, testId, enqueueSnackbar }: Props) {
   if (!source.default || !source.raw || !source.relativePath) {
     throw new Error(
       'Missing component or raw component code, you likely forgot to .example to your example extension'
     );
   }
 
-  const utils = useUtils();
   const classes = useStyles();
-  const currentLib = useContext(UtilsContext).lib;
-  const [expanded, setExpanded] = useState(false);
+  const currentLib = React.useContext(UtilsContext).lib;
+  const [expanded, setExpanded] = React.useState(false);
 
   const replacedSource = replaceGetFormatStrings(currentLib, source.raw);
-  const copySource = useCallback(
+  const copySource = React.useCallback(
     () =>
       copy(replacedSource).then(() =>
         enqueueSnackbar('Source copied', { variant: 'success', autoHideDuration: 1000 })
@@ -81,8 +80,11 @@ function Example({ source, enqueueSnackbar }: Props) {
     [enqueueSnackbar, replacedSource]
   );
 
-  // make each component rerender only on utils change
-  const Component = useMemo(() => withUtilsService(source.default), [source.default]);
+  // remount component only if utils change
+  const ExampleComponent = React.useMemo(
+    () => withUtilsService(source.default),
+    [currentLib, source.default] // eslint-disable-line
+  );
 
   return (
     <>
@@ -116,17 +118,14 @@ function Example({ source, enqueueSnackbar }: Props) {
         </div>
       </Collapse>
 
-      <div className={classes.pickers}>
+      <div data-test-id={testId} className={classes.pickers}>
         <Tooltip title="Show/Hide the source">
           <IconButton className={classes.sourceBtn} onClick={() => setExpanded(!expanded)}>
             <CodeIcon />
           </IconButton>
         </Tooltip>
 
-        <Component
-          // remount component when utils changed
-          key={utils.constructor.name}
-        />
+        <ExampleComponent key={currentLib} />
       </div>
     </>
   );
