@@ -1,11 +1,12 @@
 import { MaterialUiPickersDate } from './date';
 import { WrapperVariant } from '../wrappers/Wrapper';
 import { ParsableDate } from '../constants/prop-types';
+import { ToolbarComponentProps } from '../Picker/Picker';
 
 export interface BasePickerProps {
   /** Picker value */
   value: ParsableDate;
-  /** onChange callback */
+  /** onChange callback @DateIOType */
   onChange: (date: MaterialUiPickersDate) => void;
   /**
    * Auto accept date on selection
@@ -16,12 +17,12 @@ export interface BasePickerProps {
   format?: string;
   /** Disable datepicker and text field */
   disabled?: boolean;
-  /** Dynamic formatter of text field label */
+  /** Dynamic formatter of text field value @DateIOType */
   labelFunc?: (date: MaterialUiPickersDate, invalidLabel: string) => string;
-  /** Date that will be initially highlighted */
+  /** Date that will be initially highlighted if null was passed */
   initialFocusedDate?: ParsableDate;
   /**
-   * Message displaying in text field, if date is invalid (doesn't work in keyboard mode)
+   * Message displaying in text field if date is invalid (doesn't work in keyboard mode)
    * @default 'unknown'
    */
   invalidLabel?: string;
@@ -30,9 +31,11 @@ export interface BasePickerProps {
    * @default ' '
    */
   emptyLabel?: string;
-  /** Callback fired when date isAccepted */
+  /** Callback fired when date is accepted @DateIOType */
   onAccept?: (date: MaterialUiPickersDate) => void;
-  /** Callback fired when new error should be displayed */
+  /** Callback fired when new error should be displayed
+   * (!! This is a side effect. Be careful if you want to rerender the component) @DateIOType
+   */
   onError?: (error: React.ReactNode, value: MaterialUiPickersDate | ParsableDate) => void;
   /** On open callback */
   onOpen?: () => void;
@@ -45,7 +48,12 @@ export interface BasePickerProps {
    * @default false
    */
   disableToolbar?: boolean;
+  /**
+   * Force rendering in particular orientation
+   * @default "portrait"
+   */
+  orientation?: 'portrait' | 'landscape';
+  /** Component that will replace default toolbar renderer */
+  ToolbarComponent?: React.ComponentType<ToolbarComponentProps>;
   variant?: WrapperVariant;
-  mergePreviousDateOnChange?: boolean;
-  forwardedRef?: any;
 }

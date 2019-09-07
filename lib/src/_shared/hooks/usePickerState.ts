@@ -45,12 +45,12 @@ export function usePickerState(props: BasePickerProps, options: StateHookOptions
 
   const acceptDate = useCallback(
     (acceptedDate: MaterialUiPickersDate) => {
-      setIsOpen(false);
       onChange(acceptedDate);
-
       if (onAccept) {
         onAccept(acceptedDate);
       }
+
+      setIsOpen(false);
     },
     [onAccept, onChange, setIsOpen]
   );
@@ -75,21 +75,24 @@ export function usePickerState(props: BasePickerProps, options: StateHookOptions
       onChange: (newDate: MaterialUiPickersDate, isFinish = true) => {
         setPickerDate(newDate);
 
-        if (variant === 'inline') {
-          onChange(newDate);
-        }
-
         if (isFinish && autoOk) {
           acceptDate(newDate);
+          return;
+        }
+
+        // simulate autoOk, but do not close the modal
+        if (variant === 'inline' || variant === 'static') {
+          onChange(newDate);
+          onAccept && onAccept(newDate);
         }
       },
     }),
-    [acceptDate, autoOk, onChange, pickerDate, variant]
+    [acceptDate, autoOk, onAccept, onChange, pickerDate, variant]
   );
 
   const validationError = validate(value, utils, props);
   useEffect(() => {
-    if (validationError && onError) {
+    if (onError) {
       onError(validationError, value);
     }
   }, [onError, validationError, value]);
@@ -99,7 +102,7 @@ export function usePickerState(props: BasePickerProps, options: StateHookOptions
     () => ({
       inputValue,
       validationError,
-      onClick: () => !disabled && setIsOpen(true),
+      openPicker: () => !disabled && setIsOpen(true),
     }),
     [disabled, inputValue, setIsOpen, validationError]
   );

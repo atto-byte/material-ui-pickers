@@ -1,20 +1,20 @@
 import * as React from 'react';
+import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
 import InputAdornment, { InputAdornmentProps } from '@material-ui/core/InputAdornment';
 import TextField, { BaseTextFieldProps, TextFieldProps } from '@material-ui/core/TextField';
 import { Rifm } from 'rifm';
-import { IconButton } from '@material-ui/core';
 import { ExtendMui } from '../typings/extendMui';
 import { KeyboardIcon } from './icons/KeyboardIcon';
-import { IconButtonProps } from '@material-ui/core/IconButton';
 import { makeMaskFromFormat, maskedDateFormatter } from '../_helpers/text-field-helper';
 
 export interface KeyboardDateInputProps
   extends ExtendMui<BaseTextFieldProps, 'variant' | 'onError' | 'onChange' | 'value'> {
   format: string;
   onChange: (value: string | null) => void;
-  onClick?: () => void;
+  openPicker: () => void;
   validationError?: React.ReactNode;
   inputValue: string;
+  inputProps?: TextFieldProps['inputProps'];
   InputProps?: TextFieldProps['InputProps'];
   /** Override input component */
   TextFieldComponent?: React.ComponentType<TextFieldProps>;
@@ -33,7 +33,7 @@ export interface KeyboardDateInputProps
   maskChar?: string;
   /**
    * Refuse values regexp
-   * @default /[^\dap]+/gi
+   * @default /[^\d]+/gi
    */
   refuse?: RegExp;
   /**
@@ -50,18 +50,18 @@ export interface KeyboardDateInputProps
   rifmFormatter?: (str: string) => string;
 }
 
-const KeyboardDateInput: React.FunctionComponent<KeyboardDateInputProps> = ({
+export const KeyboardDateInput: React.FunctionComponent<KeyboardDateInputProps> = ({
   inputValue,
   inputVariant,
   validationError,
   KeyboardButtonProps,
   InputAdornmentProps,
-  onClick,
+  openPicker: onOpen,
   onChange,
   InputProps,
   mask,
   maskChar = '_',
-  refuse = /[^\dap]+/gi,
+  refuse = /[^\d]+/gi,
   format,
   keyboardIcon,
   disabled,
@@ -71,9 +71,9 @@ const KeyboardDateInput: React.FunctionComponent<KeyboardDateInputProps> = ({
 }) => {
   const inputMask = mask || makeMaskFromFormat(format, maskChar);
   // prettier-ignore
-  const formatter = React.useCallback(
-    maskedDateFormatter(inputMask, maskChar, refuse),
-    [mask, maskChar]
+  const formatter = React.useMemo(
+    () => maskedDateFormatter(inputMask, maskChar, refuse),
+    [inputMask, maskChar, refuse]
   );
 
   const position =
@@ -86,6 +86,7 @@ const KeyboardDateInput: React.FunctionComponent<KeyboardDateInputProps> = ({
 
   return (
     <Rifm
+      key={inputMask}
       value={inputValue}
       onChange={handleChange}
       refuse={refuse}
@@ -104,7 +105,7 @@ const KeyboardDateInput: React.FunctionComponent<KeyboardDateInputProps> = ({
             ...InputProps,
             [`${position}Adornment`]: (
               <InputAdornment position={position} {...InputAdornmentProps}>
-                <IconButton disabled={disabled} {...KeyboardButtonProps} onClick={onClick}>
+                <IconButton disabled={disabled} {...KeyboardButtonProps} onClick={onOpen}>
                   {keyboardIcon}
                 </IconButton>
               </InputAdornment>

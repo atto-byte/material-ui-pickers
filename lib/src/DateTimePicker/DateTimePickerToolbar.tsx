@@ -1,9 +1,9 @@
 import * as React from 'react';
+import Grid from '@material-ui/core/Grid';
 import ToolbarText from '../_shared/ToolbarText';
 import PickerToolbar from '../_shared/PickerToolbar';
 import ToolbarButton from '../_shared/ToolbarButton';
 import DateTimePickerTabs from './DateTimePickerTabs';
-import { Grid } from '@material-ui/core';
 import { useUtils } from '../_shared/hooks/useUtils';
 import { DateTimePickerView } from './DateTimePicker';
 import { ToolbarComponentProps } from '../Picker/Picker';
@@ -13,8 +13,6 @@ import { useMeridiemMode } from '../TimePicker/TimePickerToolbar';
 export const useStyles = makeStyles(
   _ => ({
     toolbar: {
-      flexDirection: 'row',
-      alignItems: 'center',
       paddingLeft: 16,
       paddingRight: 16,
       justifyContent: 'space-around',
@@ -46,7 +44,7 @@ export const DateTimePickerToolbar: React.FC<ToolbarComponentProps> = ({
 
   return (
     <>
-      <PickerToolbar className={classes.toolbar}>
+      <PickerToolbar isLandscape={false} className={classes.toolbar}>
         <Grid container justify="center" wrap="nowrap">
           <Grid item container xs={5} justify="flex-start" direction="column">
             <div>

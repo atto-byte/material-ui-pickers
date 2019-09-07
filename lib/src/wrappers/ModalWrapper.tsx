@@ -1,30 +1,30 @@
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import ModalDialog from '../_shared/ModalDialog';
-import { Omit } from '@material-ui/core';
 import { WrapperProps } from './Wrapper';
+import { Omit } from '../_helpers/utils';
 import { useKeyDown } from '../_shared/hooks/useKeyDown';
 import { DialogProps as MuiDialogProps } from '@material-ui/core/Dialog';
 
 export interface ModalWrapperProps<T = {}> extends WrapperProps<T> {
   /**
    * "OK" label message
-   * @default 'OK'
+   * @default "OK"
    */
   okLabel?: React.ReactNode;
   /**
    * "CANCEL" label message
-   * @default 'CANCEL'
+   * @default "CANCEL"
    */
   cancelLabel?: React.ReactNode;
   /**
    * "CLEAR" label message
-   * @default 'CLEAR'
+   * @default "CLEAR"
    */
   clearLabel?: React.ReactNode;
   /**
    * "TODAY" label message
-   * @default 'TODAY'
+   * @default "TODAY"
    */
   todayLabel?: React.ReactNode;
   /**
@@ -111,5 +111,3 @@ ModalWrapper.defaultProps = {
   clearable: false,
   showTodayButton: false,
 };
-
-export default ModalWrapper;

@@ -5,7 +5,8 @@ import DayWrapper from './DayWrapper';
 import CalendarHeader from './CalendarHeader';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import SlideTransition, { SlideDirection } from './SlideTransition';
-import { Theme } from '@material-ui/core';
+import { Theme } from '@material-ui/core/styles';
+import { VariantContext } from '../../wrappers/Wrapper';
 import { MaterialUiPickersDate } from '../../typings/date';
 import { runKeyHandler } from '../../_shared/hooks/useKeyDown';
 import { IconButtonProps } from '@material-ui/core/IconButton';
@@ -18,7 +19,7 @@ export interface OutterCalendarProps {
   leftArrowIcon?: React.ReactNode;
   /** Right arrow icon */
   rightArrowIcon?: React.ReactNode;
-  /** Custom renderer for day */
+  /** Custom renderer for day @DateIOType */
   renderDay?: (
     day: MaterialUiPickersDate,
     selectedDate: MaterialUiPickersDate,
@@ -40,9 +41,9 @@ export interface OutterCalendarProps {
    * @type {Partial<IconButtonProps>}
    */
   rightArrowButtonProps?: Partial<IconButtonProps>;
-  /** Disable specific date */
+  /** Disable specific date @DateIOType */
   shouldDisableDate?: (day: MaterialUiPickersDate) => boolean;
-  /** Callback firing on month change. Return promise to render spinner till it will not be resolved */
+  /** Callback firing on month change. Return promise to render spinner till it will not be resolved @DateIOType */
   onMonthChange?: (date: MaterialUiPickersDate) => void | Promise<void>;
   /** Custom loading indicator  */
   loadingIndicator?: JSX.Element;
@@ -52,13 +53,13 @@ export interface CalendarProps
   extends OutterCalendarProps,
     WithUtilsProps,
     WithStyles<typeof styles, true> {
-  /** Calendar Date */
+  /** Calendar Date @DateIOType */
   date: MaterialUiPickersDate;
   /** Calendar onChange */
   onChange: (date: MaterialUiPickersDate, isFinish?: boolean) => void;
-  /** Min date */
+  /** Min date @DateIOType */
   minDate?: MaterialUiPickersDate;
-  /** Max date */
+  /** Max date @DateIOType */
   maxDate?: MaterialUiPickersDate;
   /** Disable past dates */
   disablePast?: boolean;
@@ -85,6 +86,7 @@ const KeyDownListener = ({ onKeyDown }: { onKeyDown: (e: KeyboardEvent) => void 
 };
 
 export class Calendar extends React.Component<CalendarProps, CalendarState> {
+  static contextType = VariantContext;
   static propTypes: any = {
     renderDay: PropTypes.func,
     shouldDisableDate: PropTypes.func,
@@ -306,7 +308,9 @@ export class Calendar extends React.Component<CalendarProps, CalendarState> {
 
     return (
       <React.Fragment>
-        {allowKeyboardControl && <KeyDownListener onKeyDown={this.handleKeyDown} />}
+        {allowKeyboardControl && this.context !== 'static' && (
+          <KeyDownListener onKeyDown={this.handleKeyDown} />
+        )}
 
         <CalendarHeader
           currentMonth={currentMonth!}

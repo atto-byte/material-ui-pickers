@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-const useIsomorphicEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+export const useIsomorphicEffect =
+  typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
 
 type KeyHandlers = Record<KeyboardEvent['key'], () => void>;
 
@@ -15,19 +16,17 @@ export function runKeyHandler(e: KeyboardEvent, keyHandlers: KeyHandlers) {
 
 export function useKeyDown(active: boolean, keyHandlers: KeyHandlers) {
   const keyHandlersRef = React.useRef(keyHandlers);
-  useIsomorphicEffect(() => {
-    keyHandlersRef.current = keyHandlers;
-  });
+  keyHandlersRef.current = keyHandlers;
 
-  React.useEffect(() => {
+  useIsomorphicEffect(() => {
     if (active) {
       const handleKeyDown = (event: KeyboardEvent) => {
-        runKeyHandler(event, keyHandlers);
+        runKeyHandler(event, keyHandlersRef.current);
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => {
         window.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [active, keyHandlers]);
+  }, [active]);
 }

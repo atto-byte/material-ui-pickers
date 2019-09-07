@@ -2,12 +2,13 @@ import React from 'react';
 import Code from '../../_shared/Code';
 import { Grid } from '@material-ui/core';
 import { Formik, Form, Field } from 'formik';
-import { DatePicker } from '@material-ui/pickers';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 
 const DatePickerField = ({ field, form, ...other }) => {
   const currentError = form.errors[field.name];
+
   return (
-    <DatePicker
+    <KeyboardDatePicker
       clearable
       disablePast
       name={field.name}
@@ -15,8 +16,14 @@ const DatePickerField = ({ field, form, ...other }) => {
       format="dd/MM/yyyy"
       helperText={currentError}
       error={Boolean(currentError)}
-      onError={(_, error) => form.setFieldError(field.name, error)}
-      onChange={date => form.setFieldValue(field.name, date, true)}
+      onError={error => {
+        // handle as a side effect
+        if (error !== currentError) {
+          form.setFieldError(field.name, error);
+        }
+      }}
+      // if you are using custom validation schema you probably want to pass `true` as third argument
+      onChange={date => form.setFieldValue(field.name, date, false)}
       {...other}
     />
   );

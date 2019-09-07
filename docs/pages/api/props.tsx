@@ -7,7 +7,7 @@ import { PageMeta } from '_shared/PageMeta';
 import { WithRouterProps, withRouter } from 'next/router';
 import { Typography, Grid, makeStyles } from '@material-ui/core';
 
-const internalComponents = ['Calendar', 'TimePickerView'];
+const internalComponents = ['Calendar', 'ClockView'];
 const useStyles = makeStyles(theme => ({
   kawaiiIcon: {
     marginTop: 48,
@@ -56,6 +56,11 @@ const Docs: React.FC<WithRouterProps> = ({ router }) => {
           TextField
         </a>{' '}
         component.
+      </Typography>
+
+      <Typography gutterBottom>
+        <code>DateIOType</code> — date object type of your linked date-io adapter (Moment, DayJS,
+        etc.)
       </Typography>
 
       <PropTypesTable src={componentName} />

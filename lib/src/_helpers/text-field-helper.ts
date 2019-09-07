@@ -1,5 +1,5 @@
+import { Omit } from './utils';
 import { DatePickerProps } from '..';
-import { Omit } from '@material-ui/core';
 import { IUtils } from '@date-io/core/IUtils';
 import { ParsableDate } from '../constants/prop-types';
 import { BasePickerProps } from '../typings/BasePicker';
@@ -140,12 +140,12 @@ export function makeMaskFromFormat(format: string, numberMaskChar: string) {
 export const maskedDateFormatter = (mask: string, numberMaskChar: string, refuse: RegExp) => (
   value: string
 ) => {
-  if (value === '') {
-    return value;
-  }
-
   let result = '';
   const parsed = value.replace(refuse, '');
+
+  if (parsed === '') {
+    return parsed;
+  }
 
   let i = 0;
   let n = 0;

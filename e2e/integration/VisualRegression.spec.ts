@@ -18,7 +18,7 @@ describe('Visual Regression', () => {
           cy.get('[data-test-id=datepicker-example]')
             .find('input')
             .first()
-            .click();
+            .click({ force: true });
         },
       },
     },
@@ -30,7 +30,7 @@ describe('Visual Regression', () => {
         'Opened timepicker': () => {
           cy.get('input')
             .first()
-            .click();
+            .click({ force: true });
         },
       },
     },
@@ -42,7 +42,7 @@ describe('Visual Regression', () => {
         'Opened datetimepicker': () => {
           cy.get('input')
             .first()
-            .click();
+            .click({ force: true });
         },
       },
     },
@@ -53,7 +53,7 @@ describe('Visual Regression', () => {
         'Custom material-ui theme': () => {
           cy.get('[data-test-id=css-override]')
             .find('input')
-            .click();
+            .click({ force: true });
         },
       },
     },
@@ -62,7 +62,7 @@ describe('Visual Regression', () => {
   pages.forEach(page => {
     context(page.name, () => {
       before(() => {
-        const now = new Date(2019, 1, 1);
+        const now = new Date('2019-01-01T09:41:00.000Z');
         cy.clock(now.getTime());
 
         cy.visit(page.url);

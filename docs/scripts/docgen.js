@@ -1,12 +1,21 @@
 const fs = require('fs');
 const path = require('path');
+
+const removeExternalDeps = propItem =>
+  propItem.description && (!propItem.parent || !propItem.parent.fileName.includes('@types'));
+
+const removeWrapperProps = (propItem, Component) => {
+  return (
+    Component.name === 'ModalWrapper' ||
+    (propItem.parent && propItem.parent.name !== 'ModalWrapperProps')
+  );
+};
+
 const parser = require('react-docgen-typescript').withCustomConfig(
   path.resolve(__dirname, '..', '..', 'lib', 'tsconfig.json'),
   {
-    propFilter: {
-      skipPropsWithoutDoc: true,
-      skipPropsWithName: [],
-    },
+    // @ts-ignore
+    propFilter: (...args) => removeExternalDeps(...args) && removeWrapperProps(...args),
   }
 );
 
@@ -14,7 +23,6 @@ const doc = {};
 const srcPath = path.resolve(__dirname, '..', '..', 'lib', 'src');
 
 const components = [
-  // wrappers must be on top to correctly filter
   'wrappers/ModalWrapper.tsx',
   'DatePicker/DatePicker.tsx',
   'DatePicker/KeyboardDatePicker.tsx',
@@ -22,25 +30,33 @@ const components = [
   'DateTimePicker/DateTimePicker.tsx',
   'DateTimePicker/KeyboardDateTimePicker.tsx',
   // internal components
-  'DatePicker/components/Calendar.tsx',
-  'TimePicker/components/TimePickerView.tsx',
+  'views/Calendar/Calendar.tsx',
+  'views/Clock/ClockView.tsx',
 ];
 
 const customTypePattern = '\n@type {';
 const arrowFunctionRegex = /\((\((.*)=>(.*))\)/;
 
+function overrideTypeNameWithCustom(description, prop) {
+  const startOfCustomType = description.indexOf(customTypePattern) + customTypePattern.length;
+  const enfOfCustomType = description.indexOf('}', startOfCustomType);
+  const customType = description.substr(startOfCustomType, enfOfCustomType - startOfCustomType);
+
+  prop.type.name = customType;
+  prop.description = description.slice(0, description.indexOf(customTypePattern));
+}
+
 function processProp(prop) {
   const { description } = prop;
 
+  if (description.includes('@DateIOType')) {
+    prop.type.name = prop.type.name.replace(/any/g, 'DateIOType');
+    prop.description = description.replace(' @DateIOType', '');
+  }
+
   // override type with a custom name if needed
   if (description.includes(customTypePattern)) {
-    const startOfCustomType = description.indexOf(customTypePattern) + customTypePattern.length;
-    const enfOfCustomType = description.indexOf('}', startOfCustomType);
-
-    const customType = description.substr(startOfCustomType, enfOfCustomType - startOfCustomType);
-
-    prop.type.name = customType;
-    prop.description = description.slice(0, description.indexOf(customTypePattern));
+    overrideTypeNameWithCustom(description, prop);
   }
 
   // replace additional () injected outside of arrow functions
@@ -53,17 +69,6 @@ function processProp(prop) {
   prop.type.name = prop.type.name.replace(' | undefined', '');
 }
 
-const removeExternalDeps = ([_, value]) =>
-  value.description && (!value.parent || !value.parent.fileName.includes('@types'));
-
-const removeWrapperProps = name => ([_, value]) => {
-  if (name !== 'ModalWrapper') {
-    return !Object.keys(doc['ModalWrapper']).includes(value.name);
-  }
-
-  return true;
-};
-
 components.forEach(filePart => {
   const file = path.join(srcPath, filePart);
   const parsedDocs = parser.parse(file);
@@ -73,16 +78,16 @@ components.forEach(filePart => {
       return;
     }
 
-    doc[parsedDoc.displayName] = Object.entries(parsedDoc.props)
-      .filter(removeExternalDeps)
-      .filter(removeWrapperProps(parsedDoc.displayName))
-      .reduce((obj, [key, value]) => {
-        processProp(value);
+    doc[parsedDoc.displayName] = Object.entries(parsedDoc.props).reduce(
+      (obj, [key, propTypeObj]) => {
+        processProp(propTypeObj);
 
-        obj[key] = value;
+        obj[key] = propTypeObj;
         return obj;
-      }, {});
+      },
+      {}
+    );
   });
 });
 
-fs.writeFileSync(path.resolve(__dirname, '..', 'prop-types.json'), JSON.stringify(doc));
+fs.writeFileSync(path.resolve(__dirname, '..', 'prop-types.json'), JSON.stringify(doc, null, 2));
